@@ -4,96 +4,85 @@ RD Station CRM worker for the **modest-galois** project. Fetches the full CRM gr
 
 The sync strategy is a full replace every run: nuke the sales schema, repopulate from scratch. At ~2000 records this is faster than diffing.
 
-## Flow
+## Fetch flow
 
 ```mermaid
 flowchart TD
-    S([start]) --> RT[rotate token\nDB + env → POST /oauth2/token → DB]
-    RT --> F1(( ))
+    S([start])
 
-    F1 --> U[fetch /users]
-    F1 --> T[fetch /teams]
-    F1 --> PL[fetch /pipelines]
-    F1 --> CA[fetch /campaigns]
-    F1 --> LR[fetch /lost_reasons]
-    F1 --> SO[fetch /sources]
-    F1 --> SE[fetch /segments]
-    F1 --> PR[fetch /products]
-    F1 --> OR[fetch /organizations]
-    F1 --> CO[fetch /contacts]
-    F1 --> TA[fetch /tasks]
+    S --> U[fetch users page]
+    S --> T[fetch teams page]
+    S --> PL[fetch pipelines page]
+    S --> CA[fetch campaigns page]
+    S --> LR[fetch lost_reasons page]
+    S --> SO[fetch sources page]
+    S --> SE[fetch segments page]
+    S --> OR[fetch organizations page]
+    S --> CO[fetch contacts page]
+    S --> TA[fetch tasks page]
+    S --> PR[fetch products page]
 
-    U --> PU{next page?}
+    U --> PU{more pages?}
     PU -- yes --> U
-    PU -- no --> J1(( ))
+    PU -- no --> E([end])
 
-    T --> PT{next page?}
+    T --> PT{more pages?}
     PT -- yes --> T
-    PT -- no --> J1
+    PT -- no --> E
 
-    PL --> PPL{next page?}
+    PL --> PPL{more pages?}
     PPL -- yes --> PL
-    PPL -- no --> J1
-
-    CA --> PCA{next page?}
-    PCA -- yes --> CA
-    PCA -- no --> J1
-
-    LR --> PLR{next page?}
-    PLR -- yes --> LR
-    PLR -- no --> J1
-
-    SO --> PSO{next page?}
-    PSO -- yes --> SO
-    PSO -- no --> J1
-
-    SE --> PSE{next page?}
-    PSE -- yes --> SE
-    PSE -- no --> J1
-
-    PR --> PPR{next page?}
-    PPR -- yes --> PR
-    PPR -- no --> J1
-
-    OR --> POR{next page?}
-    POR -- yes --> OR
-    POR -- no --> J1
-
-    CO --> PCO{next page?}
-    PCO -- yes --> CO
-    PCO -- no --> J1
-
-    TA --> PTA{next page?}
-    PTA -- yes --> TA
-    PTA -- no --> J1
-
-    J1 --> F2(( ))
-
-    F2 --> STG[fetch /pipelines/id/stages\nonce per pipeline]
-    F2 --> OND[fetch /deals status:ongoing\nonce per product]
-    F2 --> WON[fetch /deals status:won last 12mo\nonce per product]
-
-    STG --> PSTG{next page?}
+    PPL -- yes --> STG[fetch stages page\nfor each pipeline in batch]
+    PPL -- no --> STG
+    STG --> PSTG{more pages?}
     PSTG -- yes --> STG
-    PSTG -- no --> J2(( ))
+    PSTG -- no --> E
 
-    OND --> POND{next page?}
+    CA --> PCA{more pages?}
+    PCA -- yes --> CA
+    PCA -- no --> E
+
+    LR --> PLR{more pages?}
+    PLR -- yes --> LR
+    PLR -- no --> E
+
+    SO --> PSO{more pages?}
+    PSO -- yes --> SO
+    PSO -- no --> E
+
+    SE --> PSE{more pages?}
+    PSE -- yes --> SE
+    PSE -- no --> E
+
+    OR --> POR{more pages?}
+    POR -- yes --> OR
+    POR -- no --> E
+
+    CO --> PCO{more pages?}
+    PCO -- yes --> CO
+    PCO -- no --> E
+
+    TA --> PTA{more pages?}
+    PTA -- yes --> TA
+    PTA -- no --> E
+
+    PR --> PPR{more pages?}
+    PPR -- yes --> PR
+    PPR -- yes --> OND[fetch ongoing deals page\nfor each product in batch]
+    PPR -- yes --> CLD[fetch closed deals page\nfor each product in batch]
+    PPR -- no --> OND
+    PPR -- no --> CLD
+
+    OND --> POND{more pages?}
     POND -- yes --> OND
-    POND -- no --> J2
+    POND -- no --> E
 
-    WON --> PWON{next page?}
-    PWON -- yes --> WON
-    PWON -- no --> J2
-
-    J2 --> INJ[inject pipeline_id into stages]
-    INJ --> DD[deduplicate deals\nbuild deal → products map]
-    DD --> BLD[build domain models]
-    BLD --> NK[nuke sales schema]
-    NK --> INS[insert deals graph]
-    INS --> E([end])
+    CLD --> PCLD{more pages?}
+    PCLD -- yes --> CLD
+    PCLD -- no --> E
 ```
 
-The two fork/join circles mark the round boundaries. Everything between a fork and its join fires in parallel. Pagination within each branch is sequential — follow `next` until it is absent.
+ISO 5807 convention: multiple lines leaving a symbol all fire in parallel. Every chain drains independently to `end`.
 
 ## Runtime
 
