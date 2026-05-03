@@ -7,7 +7,7 @@ The sync strategy is a full replace every run: nuke the sales schema, repopulate
 ## Fetch flow
 
 ```mermaid
-flowchart TD
+flowchart LR
     S([start])
 
     S --> U[fetch users page]
