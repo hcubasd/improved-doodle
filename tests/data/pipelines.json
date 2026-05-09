@@ -1,0 +1,21 @@
+{
+  "data": [
+    {
+      "id": "string",
+      "name": "string",
+      "order": 0,
+      "stage_ids": [
+        "string"
+      ],
+      "created_at": "2026-04-24T22:09:05.006Z",
+      "updated_at": "2026-04-24T22:09:05.006Z"
+    }
+  ],
+  "links": {
+    "first": "string",
+    "prev": "string",
+    "self": "string",
+    "next": "string",
+    "last": "string"
+  }
+}

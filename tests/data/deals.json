@@ -1,0 +1,45 @@
+{
+  "data": [
+    {
+      "id": "string",
+      "name": "string",
+      "recurrence_price": 0,
+      "one_time_price": 0,
+      "total_price": 0,
+      "expected_close_date": "2026-04-24",
+      "rating": 0,
+      "status": "won",
+      "closed_at": "2026-04-24T22:09:05.006Z",
+      "pipeline_id": "string",
+      "stage_id": "string",
+      "owner_id": "string",
+      "source_id": "string",
+      "campaign_id": "string",
+      "lost_reason_id": "string",
+      "organization_id": "string",
+      "contact_ids": [
+        "string"
+      ],
+      "custom_fields": {
+        "additionalProp": "string"
+      },
+      "distribution_settings": {
+        "stage_id": "string",
+        "rule": {
+          "type": "user",
+          "id": "string",
+          "email": "string"
+        }
+      },
+      "created_at": "2026-04-24T22:09:05.006Z",
+      "updated_at": "2026-04-24T22:09:05.006Z"
+    }
+  ],
+  "links": {
+    "first": "string",
+    "prev": "string",
+    "self": "string",
+    "next": "string",
+    "last": "string"
+  }
+}

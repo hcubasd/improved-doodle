@@ -1,0 +1,34 @@
+{
+  "data": [
+    {
+      "id": "string",
+      "name": "string",
+      "description": "string",
+      "url": "string",
+      "address": {
+        "line": "string",
+        "latitude": "string",
+        "longitude": "string"
+      },
+      "segment_ids": [
+        "string"
+      ],
+      "follower_ids": [
+        "string"
+      ],
+      "owner_id": "string",
+      "custom_fields": {
+        "additionalProp": "string"
+      },
+      "created_at": "2026-04-24T22:09:05.006Z",
+      "updated_at": "2026-04-24T22:09:05.006Z"
+    }
+  ],
+  "links": {
+    "first": "string",
+    "prev": "string",
+    "self": "string",
+    "next": "string",
+    "last": "string"
+  }
+}

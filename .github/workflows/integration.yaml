@@ -1,0 +1,12 @@
+name: Integration
+on:
+  push:
+    branches:
+      - "**"
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: docker compose up --wait
+      - run: docker compose exec -T -w /root/app app bash -c ". scripts/integrate.sh"

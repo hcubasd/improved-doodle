@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:18
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: example
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+    volumes:
+      - db:/var/lib/postgresql/18/docker
+  migrations:
+    image: ghcr.io/hcubasd/curly-spoon:0.1.5
+    depends_on:
+      db:
+        condition: service_healthy
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://postgres:example@db:5432/postgres?sslmode=disable"
+      - "up"
+  app:
+    image: python:3.14
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    volumes:
+      - .:/root/app
+    command: sleep infinity
+volumes:
+  db:
