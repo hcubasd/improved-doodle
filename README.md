@@ -69,7 +69,7 @@ flowchart
     PR --> PPR{more pages?}
     PPR -- yes --> PR
     PPR -- yes --> OND[fetch ongoing deals page\nfor each product in batch]
-    PPR -- yes --> CLD[fetch closed deals page\nfor each product in batch]
+    PPR -- yes --> CLD[fetch won deals page\nfor each product in batch]
     PPR -- no --> OND
     PPR -- no --> CLD
 
@@ -90,8 +90,8 @@ The worker reads the following from the environment:
 
 | Variable | Source | Purpose |
 |---|---|---|
-| `RDS_CLIENT_ID` | k8s secret | OAuth2 app client ID |
-| `RDS_CLIENT_SECRET` | k8s secret | OAuth2 app client secret |
+| `CRM_CLIENT_ID` | k8s secret | OAuth2 app client ID |
+| `CRM_CLIENT_SECRET` | k8s secret | OAuth2 app client secret |
 | `PGHOST` / `PGPORT` / `PGUSER` / `PGPASSWORD` / `PGDATABASE` | k8s secret | Postgres connection |
 
 `access_token` and `refresh_token` are read from and written back to the `tokens` table (`provider = 'rdstation'`).
@@ -101,4 +101,4 @@ The worker reads the following from the environment:
 Helper scripts for setting up a development environment on a new machine:
 
 - `scripts/config-helix.sh` — configures the Helix editor for this project's stack
-- `scripts/install-requirements.sh` — installs Python dependencies and the package in editable mode
+- `scripts/integrate.sh` — creates a venv, installs dependencies, and runs the test suite

@@ -67,7 +67,7 @@ def fetch() -> dict:
     with psycopg.connect() as conn:
         tokens_repository = TokensRepository(conn)
         token: Token = tokens_repository.get("rd_station")
-        token = rotate_tokens(os.getenv("CLIENT_ID"), os.getenv("CLIENT_SECRET"), token)
+        token = rotate_tokens(os.getenv("CRM_CLIENT_ID"), os.getenv("CRM_CLIENT_SECRET"), token)
 
         tokens_repository.update("rd_station", token)
         conn.commit()
