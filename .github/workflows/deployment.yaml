@@ -5,9 +5,10 @@ on:
       - "v*.*.*"
 jobs:
   deploy:
-    uses: hcubasd/fuzzy-garbanzo/.github/workflows/fuzzy-garbanzo.yaml@v0.1.1
+    uses: hcubasd/fuzzy-garbanzo/.github/workflows/fuzzy-garbanzo.yaml@v0.1.3
     with:
       registry: docker.io
+      repository: improved-doodle
     secrets:
       username: ${{secrets.DOCKERHUB_USERNAME}}
       password: ${{secrets.DOCKERHUB_TOKEN}}

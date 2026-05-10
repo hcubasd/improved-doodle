@@ -12,13 +12,13 @@ RD Station API
 raw dicts
   ↓ fetched_deals_assembler.py
 list[CRMDeal]
-  ↓ src/script/deals_repository/   (TRUNCATE → INSERT, one transaction)
+  ↓ src/script/deals_repository/   (DELETE → INSERT, one transaction)
 Postgres sales.*
   ↓ selected_deals_assembler.py
 list[CRMDeal]
 ```
 
-`src/script/__main__.py` is the entrypoint (`python -m src.script`). It calls `fetch_deals()` to run the fetch and assembly, then writes the resulting `list[CRMDeal]` to Postgres via `DealsRepository.update()`.
+`src/script/__main__.py` is the entrypoint. In local dev run with `python -m src.script`; in the Docker image, `COPY ./src ./` flattens the layout so it becomes `python -m script` (set by the k8s manifest). It calls `fetch_deals()` to run the fetch and assembly, then writes the resulting `list[CRMDeal]` to Postgres via `DealsRepository.update()`.
 
 ## Module layout
 
@@ -40,7 +40,7 @@ src/script/
       paginated_fetch_maker.py       generic pagination over page[number]/page[size]
   deals_repository/
     main.py                          DealsRepository — .update(deals) and .get()
-    deleter.py                       TRUNCATE all sales.* tables
+    deleter.py                       DELETE from all sales.* tables
     inserters.py                     insert_* per table, ON CONFLICT DO NOTHING
     selectors.py                     select_* per table
     selected_deals_assembler.py      DB rows → list[CRMDeal]
@@ -151,24 +151,25 @@ Exec into the app container and install dependencies:
 ```sh
 docker compose exec app bash
 cd /root/app
-pip install -r requirements.txt
-```
-
-Run the fetch + assembly tests (no DB needed):
-
-```sh
-pytest tests/test_worker.py
+. scripts/install-dependencies.sh
 ```
 
 Run the full roundtrip test (requires the compose DB to be up and migrated):
 
 ```sh
+. ~/.venv/bin/activate
+python -m pip install pytest
 pytest tests/test_roundtrip.py
 ```
 
 The roundtrip test mock-fetches from `tests/data/*.json`, assembles `list[CRMDeal]`, writes to the live DB via `DealsRepository.update()`, reads back via `DealsRepository.get()`, and asserts the returned deals match the inserted deals across their serialized fields.
 
+## Deployment
+
+Pushing a `v*.*.*` tag triggers the `deployment` workflow, which builds a multi-arch Docker image (`linux/amd64`, `linux/arm64`) and pushes it to Docker Hub via the shared [fuzzy-garbanzo](https://github.com/hcubasd/fuzzy-garbanzo) workflow. Requires `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` set as repository secrets.
+
 ## Scripts
 
 - `scripts/config-helix.sh` — configures the Helix editor for this project's stack
-- `scripts/integrate.sh` — creates a venv, installs dependencies, and runs the test suite
+- `scripts/install-dependencies.sh` — creates a venv at `~/.venv` and installs production dependencies
+- `scripts/integrate.sh` — installs dependencies, adds pytest, and runs the test suite
