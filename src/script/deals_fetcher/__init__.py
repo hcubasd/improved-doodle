@@ -1,1 +1,1 @@
-from .main import fetch_deals
+from .deals_fetcher import fetch_deals as fetch_deals

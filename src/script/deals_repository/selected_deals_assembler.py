@@ -1,3 +1,5 @@
+from typing import Any
+
 import psycopg
 
 from fluffy_waddle.sales import (
@@ -128,7 +130,7 @@ def _tasks_by_deal_map(tasks_rows, user_map, tasks_users_rows):
     return result
 
 
-def assemble_selected_deals(cur: psycopg.Cursor) -> list[CRMDeal]:
+def assemble_selected_deals(cur: psycopg.Cursor[dict[str, Any]]) -> list[CRMDeal]:
     industry_map = _leaf_map(CRMIndustry, select_all(cur, "sales.crm_industries"))
     product_map = _leaf_map(CRMProduct, select_all(cur, "sales.crm_products"))
     loss_reason_map = _leaf_map(

@@ -21,13 +21,9 @@ def make_fetch_pipelines(fetcher: Fetcher):
             )
             pipelines.extend(batch)
             for pipeline in batch:
+                pid = str(pipeline["id"])
                 tasks.append(
-                    (
-                        pipeline["id"],
-                        asyncio.create_task(
-                            fetch_pipeline_stages_by_pipeline(pipeline["id"])
-                        ),
-                    )
+                    (pid, asyncio.create_task(fetch_pipeline_stages_by_pipeline(pid)))
                 )
             if not has_next:
                 break

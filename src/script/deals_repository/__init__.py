@@ -1,1 +1,1 @@
-from .main import DealsRepository
+from .deals_repository import DealsRepository as DealsRepository

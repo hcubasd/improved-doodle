@@ -19,8 +19,9 @@ def make_fetch_products(fetcher: Fetcher, cutoff: str):
             )
             all_products.extend(batch)
             for p in batch:
+                pid = str(p["id"])
                 deal_tasks.append(
-                    (p["id"], asyncio.create_task(fetch_deals_by_product(p["id"])))
+                    (pid, asyncio.create_task(fetch_deals_by_product(pid)))
                 )
             if not has_next:
                 break

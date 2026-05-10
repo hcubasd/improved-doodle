@@ -4,7 +4,7 @@ from pathlib import Path
 import psycopg
 import pytest
 
-from src.script.deals_fetcher.main import _fetch_all
+from src.script.deals_fetcher.deals_fetcher import _fetch_all
 from src.script.deals_fetcher.fetched_deals_assembler import assemble_fetched_deals
 from src.script.deals_repository import DealsRepository
 from tests.fetch_json_maker import make_fetch_json

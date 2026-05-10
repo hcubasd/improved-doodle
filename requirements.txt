@@ -1,3 +1,3 @@
-fluffy-waddle~=0.1
+fluffy-waddle==0.1.2
 httpx~=0.27
 psycopg[binary]~=3.0

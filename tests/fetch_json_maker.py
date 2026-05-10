@@ -19,9 +19,7 @@ _FIXTURE_MAP = {
 
 
 def make_fetch_json(data_dir: Path):
-    async def fetch_json(
-        url: str, params: dict | None = None
-    ) -> tuple[list[dict], bool]:
+    async def fetch_json(url: str, _: dict | None = None) -> tuple[list[dict], bool]:
         key = url.rstrip("/").split("/")[-1]
         data = json.loads((data_dir / _FIXTURE_MAP[key]).read_text())
         return data["data"], False
