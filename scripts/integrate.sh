@@ -1,5 +1,4 @@
 set -e
-python -m venv ~/.venv
-. ~/.venv/bin/activate
-python -m pip install -r requirements.txt
+. scripts/install-dependencies.sh
+python -m pip install pytest
 python -m pytest
