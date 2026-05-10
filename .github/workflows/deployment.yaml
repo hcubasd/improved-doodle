@@ -13,3 +13,4 @@ jobs:
       password: ${{secrets.DOCKERHUB_TOKEN}}
     permissions:
       contents: write
+      packages: write
