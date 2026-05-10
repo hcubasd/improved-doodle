@@ -1,9 +1,10 @@
 import asyncio
 import os
-from datetime import date, timedelta
+from datetime import date
 
 import httpx
 import psycopg
+from fluffy_waddle.sales import CRMDeal
 
 from .fetcher import Fetcher
 from .helpers.httpx_fetch_maker import make_httpx_fetch
@@ -12,10 +13,16 @@ from .fetch_pipelines_maker import make_fetch_pipelines
 from .fetch_products_maker import make_fetch_products
 from .tokens_repository import Token, TokensRepository
 from .tokens_rotator import rotate_tokens
+from .fetched_deals_assembler import assemble_fetched_deals
+
+
+def _won_deals_cutoff(today: date | None = None) -> str:
+    today = today or date.today()
+    return today.replace(year=today.year - 1, day=1).strftime("%Y-%m-%d 00:00:00")
 
 
 async def _fetch_all(fetcher: Fetcher) -> dict:
-    cutoff = (date.today() - timedelta(days=365)).strftime("%Y-%m-%d")
+    cutoff = _won_deals_cutoff()
     paginated_fetch = make_paginated_fetch(fetcher)
     fetch_pipelines = make_fetch_pipelines(fetcher)
     fetch_products = make_fetch_products(fetcher, cutoff)
@@ -53,6 +60,7 @@ async def _fetch_all(fetcher: Fetcher) -> dict:
         "pipeline_stages": pipeline_stages,
         "campaigns": campaigns,
         "loss_reasons": loss_reasons,
+        "sources": sources,
         "industries": segments,
         "products": products,
         "organizations": organizations,
@@ -63,20 +71,31 @@ async def _fetch_all(fetcher: Fetcher) -> dict:
     }
 
 
-def fetch() -> dict:
+def _require_env(name: str) -> str:
+    value = os.getenv(name)
+    if value is None:
+        raise ValueError(f"Missing required environment variable {name}")
+    return value
+
+
+def fetch_deals() -> list[CRMDeal]:
     with psycopg.connect() as conn:
         tokens_repository = TokensRepository(conn)
         token: Token = tokens_repository.get("rd_station")
-        token = rotate_tokens(os.getenv("CRM_CLIENT_ID"), os.getenv("CRM_CLIENT_SECRET"), token)
+        token = rotate_tokens(
+            _require_env("CRM_CLIENT_ID"),
+            _require_env("CRM_CLIENT_SECRET"),
+            token,
+        )
 
         tokens_repository.update("rd_station", token)
         conn.commit()
 
-    async def _run() -> dict:
+    async def _run():
         async with httpx.AsyncClient(
             headers={"Authorization": f"Bearer {token.access_token}"},
             timeout=30.0,
         ) as client:
             return await _fetch_all(make_httpx_fetch(client))
 
-    return asyncio.run(_run())
+    return assemble_fetched_deals(asyncio.run(_run()))

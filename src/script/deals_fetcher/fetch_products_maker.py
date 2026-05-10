@@ -33,6 +33,10 @@ def make_fetch_products(fetcher: Fetcher, cutoff: str):
                 did = deal["id"]
                 deals_by_id[did] = deal
                 deal_products.setdefault(did, []).append(pid)
+        deal_products = {
+            did: list(dict.fromkeys(product_ids))
+            for did, product_ids in deal_products.items()
+        }
         return all_products, list(deals_by_id.values()), deal_products
 
     return fetch_products

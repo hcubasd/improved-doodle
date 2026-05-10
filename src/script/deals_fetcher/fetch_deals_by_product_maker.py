@@ -11,9 +11,7 @@ def make_fetch_deals_by_product(fetcher: Fetcher, cutoff: str):
         )
         won = await paginated_fetch(
             "/deals",
-            {
-                "filter": f'product_ids:({product_id}) status:won closed_at:>"{cutoff} 12:00:00"'
-            },
+            {"filter": f'product_ids:({product_id}) status:won closed_at:>"{cutoff}"'},
         )
         return ongoing, won
 

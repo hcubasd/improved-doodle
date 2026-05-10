@@ -1,8 +1,50 @@
 # improved-doodle
 
-RD Station CRM worker for the **modest-galois** project. Fetches the full CRM graph from the RD Station v2 API, builds the domain model via **fluffy-waddle**, and writes it to the sales schema in Postgres.
+RD Station CRM worker for the **modest-galois** project. Fetches the full CRM graph from the RD Station v2 API, assembles it into domain objects via **fluffy-waddle**, and writes it to the sales schema in Postgres.
 
 The sync strategy is a full replace every run: nuke the sales schema, repopulate from scratch. At ~2000 records this is faster than diffing.
+
+## Full flow
+
+```
+RD Station API
+  ↓ src/script/deals_fetcher/   (async, concurrent)
+raw dicts
+  ↓ fetched_deals_assembler.py
+list[CRMDeal]
+  ↓ src/script/deals_repository/   (TRUNCATE → INSERT, one transaction)
+Postgres sales.*
+  ↓ selected_deals_assembler.py
+list[CRMDeal]
+```
+
+`src/script/__main__.py` is the entrypoint (`python -m src.script`). It calls `fetch_deals()` to run the fetch and assembly, then writes the resulting `list[CRMDeal]` to Postgres via `DealsRepository.update()`.
+
+## Module layout
+
+```
+src/script/
+  __main__.py                        entrypoint
+  deals_fetcher/
+    main.py                          fetch_deals() → list[CRMDeal]
+    fetched_deals_assembler.py       raw API dicts → list[CRMDeal]
+    fetch_pipelines_maker.py         async pipeline + stage fetcher
+    fetch_products_maker.py          async product + deal fetcher, builds deal_products bridge
+    fetch_deals_by_product_maker.py  ongoing + won deals per product, cutoff at the start of the same month one year back
+    fetch_pipeline_stages_by_pipeline_maker.py
+    fetcher.py                       Fetcher type alias
+    tokens_repository.py             read/write tokens table
+    tokens_rotator.py                OAuth2 refresh token flow
+    helpers/
+      httpx_fetch_maker.py           wraps httpx.AsyncClient as Fetcher
+      paginated_fetch_maker.py       generic pagination over page[number]/page[size]
+  deals_repository/
+    main.py                          DealsRepository — .update(deals) and .get()
+    deleter.py                       TRUNCATE all sales.* tables
+    inserters.py                     insert_* per table, ON CONFLICT DO NOTHING
+    selectors.py                     select_* per table
+    selected_deals_assembler.py      DB rows → list[CRMDeal]
+```
 
 ## Fetch flow
 
@@ -94,11 +136,39 @@ The worker reads the following from the environment:
 | `CRM_CLIENT_SECRET` | k8s secret | OAuth2 app client secret |
 | `PGHOST` / `PGPORT` / `PGUSER` / `PGPASSWORD` / `PGDATABASE` | k8s secret | Postgres connection |
 
-`access_token` and `refresh_token` are read from and written back to the `tokens` table (`provider = 'rdstation'`).
+`access_token` and `refresh_token` are read from and written back to the `tokens` table (`provider = 'rd_station'`).
+
+## Development
+
+Start the compose stack (Postgres + migrations + app shell):
+
+```sh
+docker compose up -d
+```
+
+Exec into the app container and install dependencies:
+
+```sh
+docker compose exec app bash
+cd /root/app
+pip install -r requirements.txt
+```
+
+Run the fetch + assembly tests (no DB needed):
+
+```sh
+pytest tests/test_worker.py
+```
+
+Run the full roundtrip test (requires the compose DB to be up and migrated):
+
+```sh
+pytest tests/test_roundtrip.py
+```
+
+The roundtrip test mock-fetches from `tests/data/*.json`, assembles `list[CRMDeal]`, writes to the live DB via `DealsRepository.update()`, reads back via `DealsRepository.get()`, and asserts the returned deals match the inserted deals across their serialized fields.
 
 ## Scripts
-
-Helper scripts for setting up a development environment on a new machine:
 
 - `scripts/config-helix.sh` — configures the Helix editor for this project's stack
 - `scripts/integrate.sh` — creates a venv, installs dependencies, and runs the test suite
