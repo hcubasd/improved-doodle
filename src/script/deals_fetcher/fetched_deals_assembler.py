@@ -22,7 +22,7 @@ def _make_leaf_map(Model, items: list[dict]) -> dict:
 def _make_team_map(teams: list[dict]) -> dict:
     result = {}
     for raw in teams:
-        team = CRMTeam.model_validate({**raw, "id": raw["team_id"]})
+        team = CRMTeam.model_validate(raw)
         result[team.id] = team
     return result
 
@@ -51,9 +51,9 @@ def _make_pipeline_stage_map(stages: list[dict], pipeline_map: dict) -> dict:
 
 def _make_user_map(users: list[dict], teams: list[dict], team_map: dict) -> dict:
     user_team_map = {
-        user_id: team_map[raw["team_id"]]
+        user_id: team_map[raw["id"]]
         for raw in teams
-        if raw["team_id"] in team_map
+        if raw["id"] in team_map
         for user_id in raw.get("user_ids", [])
     }
     return {
