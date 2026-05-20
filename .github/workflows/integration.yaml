@@ -6,7 +6,12 @@ on:
 jobs:
   integrate:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.12.0, 3.13.0, 3.14.0]
     steps:
       - uses: actions/checkout@v6
       - run: docker compose up --wait
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
       - run: docker compose exec -T -w /root/app app bash -c ". scripts/integrate.sh"

@@ -1,10 +1,7 @@
-[[language]]
-name = "yaml"
-
-[[language]]
-name = "python"
-auto-format = true
-formatter = {command = "ruff", args = ["format", "-", "--stdin-filename", "${buffer_name}"]}
+# [[language]]
+# name = "python"
+# auto-format = true
+# formatter = {command = "ruff", args = ["format", "-", "--stdin-filename", "${buffer_name}"]}
 
 [[language-server.yaml-language-server.config.yaml.schemas]]
 "https://json.schemastore.org/github-workflow.json" = ".github/workflows/*.yaml"

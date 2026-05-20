@@ -1,4 +1,3 @@
-set -e
-python -m venv ~/.venv
+python venv ~/.venv
 . ~/.venv/bin/activate
 python -m pip install -U pip -r requirements.txt
