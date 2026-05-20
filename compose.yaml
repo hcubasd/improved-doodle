@@ -19,7 +19,7 @@ services:
       - "-database=postgres://postgres:example@db:5432/postgres?sslmode=disable"
       - "up"
   app:
-    image: python:${PYTHON_VERSION:-3.14}
+    image: python:3.14
     depends_on:
       migrations:
         condition: service_completed_successfully
