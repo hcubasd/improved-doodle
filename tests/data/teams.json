@@ -1,7 +1,7 @@
 {
   "data": [
     {
-      "team_id": "string",
+      "id": "string",
       "name": "string",
       "user_ids": [
         "string"
