@@ -202,7 +202,7 @@ def insert_contacts(
         " (%(id)s, %(organization_id)s, %(full_name)s, %(job_title)s, %(emails)s,"
         "  %(phones)s, %(social_profiles)s, %(created_at)s, %(updated_at)s, %(synced_at)s)"
         " ON CONFLICT (id) DO UPDATE SET"
-        "  organization_id = EXCLUDED.organization_id,"
+        "  organization_id = COALESCE(EXCLUDED.organization_id, sales.crm_contacts.organization_id),"
         "  full_name = EXCLUDED.full_name,"
         "  job_title = EXCLUDED.job_title,"
         "  emails = EXCLUDED.emails,"

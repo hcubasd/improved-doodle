@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timezone
 from pathlib import Path
 
 import psycopg
@@ -19,6 +20,8 @@ def _sort_key(value):
 
 
 def _normalize(value):
+    if isinstance(value, datetime):
+        return value.astimezone(timezone.utc)
     if isinstance(value, dict):
         return {key: _normalize(inner) for key, inner in value.items()}
     if isinstance(value, list):
