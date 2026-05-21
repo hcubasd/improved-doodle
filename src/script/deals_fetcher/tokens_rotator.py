@@ -22,7 +22,7 @@ def rotate_tokens(
     body = r.json()
 
     return Token(
-        provider="rd_station",
+        provider_name="rd_station",
         access_token=body["access_token"],
         refresh_token=body["refresh_token"],
         updated_at=datetime.now(UTC),
