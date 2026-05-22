@@ -12,7 +12,7 @@ RD Station API
 raw dicts
   ↓ fetched_deals_assembler.py
 list[CRMDeal]
-  ↓ src/script/deals_repository/   (DELETE → INSERT, one transaction)
+  ↓ src/script/deals_repository/   (TRUNCATE → INSERT, one transaction)
 Postgres sales.*
   ↓ selected_deals_assembler.py
 list[CRMDeal]
@@ -39,8 +39,8 @@ src/script/
       httpx_fetch_maker.py           wraps httpx.AsyncClient as Fetcher
       paginated_fetch_maker.py       generic pagination over page[number]/page[size]
   deals_repository/
-    main.py                          DealsRepository — .update(deals) and .get()
-    deleter.py                       DELETE from all sales.* tables
+    deals_repository.py              DealsRepository — .update(deals) and .get()
+    deleter.py                       TRUNCATE all sales.* tables
     inserters.py                     insert_* per table, ON CONFLICT DO NOTHING
     selectors.py                     select_* per table
     selected_deals_assembler.py      DB rows → list[CRMDeal]
