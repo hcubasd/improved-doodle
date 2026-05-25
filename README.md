@@ -151,7 +151,7 @@ Exec into the app container and install dependencies:
 ```sh
 docker compose exec app bash
 cd /root/app
-. scripts/install-dependencies.sh
+bash scripts/integrate.sh
 ```
 
 Run the full roundtrip test (requires the compose DB to be up and migrated):
