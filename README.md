@@ -171,5 +171,4 @@ Pushing a `v*.*.*` tag triggers the `deployment` workflow, which builds a multi-
 ## Scripts
 
 - `scripts/config-helix.sh` — configures the Helix editor for this project's stack
-- `scripts/install-dependencies.sh` — creates a venv at `~/.venv` and installs production dependencies
 - `scripts/integrate.sh` — installs dependencies, adds pytest, and runs the test suite
