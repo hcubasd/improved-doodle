@@ -1,3 +1,4 @@
-. scripts/install-dependencies.sh
-python -m pip install pytest
+python -m venv ~/.venv
+. ~/.venv/bin/activate
+python -m pip install -U pip -r requirements.txt pytest
 python -m pytest

@@ -1,6 +1,6 @@
 # improved-doodle
 
-RD Station CRM worker for the **modest-galois** project. Fetches the full CRM graph from the RD Station v2 API, assembles it into domain objects via **fluffy-waddle**, and writes it to the sales schema in Postgres.
+RD Station CRM worker for the dashboard project of **[mlclogistica.app](https://mlclogistica.app)**. Fetches the full CRM graph from the RD Station v2 API, assembles it into domain objects via **fluffy-waddle**, and writes it to the sales schema in Postgres.
 
 The sync strategy is a full replace every run: nuke the sales schema, repopulate from scratch. At ~2000 records this is faster than diffing.
 

@@ -20,9 +20,7 @@ def all_users(deals: list[CRMDeal]):
             yield from t.assignees
 
 
-def insert_titled(
-    cur: psycopg.Cursor, table: str, rows: list[dict]
-) -> None:
+def insert_titled(cur: psycopg.Cursor, table: str, rows: list[dict]) -> None:
     cur.executemany(
         sql.SQL(
             "INSERT INTO sales.{} (id, title, created_at, updated_at)"
@@ -33,9 +31,7 @@ def insert_titled(
     )
 
 
-def insert_titled_described(
-    cur: psycopg.Cursor, table: str, rows: list[dict]
-) -> None:
+def insert_titled_described(cur: psycopg.Cursor, table: str, rows: list[dict]) -> None:
     cur.executemany(
         sql.SQL(
             "INSERT INTO sales.{} (id, title, description, created_at, updated_at)"
@@ -46,9 +42,7 @@ def insert_titled_described(
     )
 
 
-def insert_loss_reasons(
-    cur: psycopg.Cursor, rows: list[dict]
-) -> None:
+def insert_loss_reasons(cur: psycopg.Cursor, rows: list[dict]) -> None:
     cur.executemany(
         "INSERT INTO sales.crm_loss_reasons (id, reason, created_at, updated_at)"
         " VALUES (%(id)s, %(reason)s, %(created_at)s, %(updated_at)s)"
@@ -68,9 +62,7 @@ def insert_join(
     )
 
 
-def insert_users(
-    cur: psycopg.Cursor, users: list[CRMUser]
-) -> None:
+def insert_users(cur: psycopg.Cursor, users: list[CRMUser]) -> None:
     cur.executemany(
         "INSERT INTO sales.crm_users"
         " (id, full_name, email, phone, created_at, updated_at)"
@@ -80,9 +72,7 @@ def insert_users(
     )
 
 
-def insert_pipelines(
-    cur: psycopg.Cursor, deals: list[CRMDeal]
-) -> None:
+def insert_pipelines(cur: psycopg.Cursor, deals: list[CRMDeal]) -> None:
     cur.executemany(
         "INSERT INTO sales.crm_pipelines"
         " (id, title, display_order, created_at, updated_at)"
@@ -92,9 +82,7 @@ def insert_pipelines(
     )
 
 
-def insert_pipeline_stages(
-    cur: psycopg.Cursor, deals: list[CRMDeal]
-) -> None:
+def insert_pipeline_stages(cur: psycopg.Cursor, deals: list[CRMDeal]) -> None:
     cur.executemany(
         "INSERT INTO sales.crm_pipeline_stages"
         " (id, pipeline_id, title, description, objective, display_order, created_at, updated_at)"
@@ -102,16 +90,11 @@ def insert_pipeline_stages(
         " (%(id)s, %(pipeline_id)s, %(title)s, %(description)s, %(objective)s,"
         "  %(display_order)s, %(created_at)s, %(updated_at)s)"
         " ON CONFLICT (id) DO NOTHING",
-        [
-            {**d.stage.model_dump(), "pipeline_id": d.stage.pipeline.id}
-            for d in deals
-        ],
+        [{**d.stage.model_dump(), "pipeline_id": d.stage.pipeline.id} for d in deals],
     )
 
 
-def insert_organizations(
-    cur: psycopg.Cursor, deals: list[CRMDeal]
-) -> None:
+def insert_organizations(cur: psycopg.Cursor, deals: list[CRMDeal]) -> None:
     cur.executemany(
         "INSERT INTO sales.crm_organizations"
         " (id, owner_id, title, description, website, address, created_at, updated_at)"
@@ -123,7 +106,9 @@ def insert_organizations(
             {
                 **d.organization.model_dump(),
                 "owner_id": d.organization.owner.id if d.organization.owner else None,
-                "address": Jsonb(d.organization.address) if d.organization.address else None,
+                "address": Jsonb(d.organization.address)
+                if d.organization.address
+                else None,
             }
             for d in deals
             if d.organization
@@ -131,9 +116,7 @@ def insert_organizations(
     )
 
 
-def insert_contacts(
-    cur: psycopg.Cursor, deals: list[CRMDeal]
-) -> None:
+def insert_contacts(cur: psycopg.Cursor, deals: list[CRMDeal]) -> None:
     rows = []
     for d in deals:
         if d.organization:
@@ -169,9 +152,7 @@ def insert_contacts(
     )
 
 
-def insert_products(
-    cur: psycopg.Cursor, deals: list[CRMDeal]
-) -> None:
+def insert_products(cur: psycopg.Cursor, deals: list[CRMDeal]) -> None:
     cur.executemany(
         "INSERT INTO sales.crm_products"
         " (id, title, description, price, created_at, updated_at)"
@@ -181,9 +162,7 @@ def insert_products(
     )
 
 
-def insert_deals(
-    cur: psycopg.Cursor, deals: list[CRMDeal]
-) -> None:
+def insert_deals(cur: psycopg.Cursor, deals: list[CRMDeal]) -> None:
     cur.executemany(
         "INSERT INTO sales.crm_deals"
         " (id, stage_id, owner_id, source_id, campaign_id, loss_reason_id, organization_id,"
@@ -209,9 +188,7 @@ def insert_deals(
     )
 
 
-def insert_tasks(
-    cur: psycopg.Cursor, deals: list[CRMDeal]
-) -> None:
+def insert_tasks(cur: psycopg.Cursor, deals: list[CRMDeal]) -> None:
     cur.executemany(
         "INSERT INTO sales.crm_tasks"
         " (id, created_by_id, completed_by_id, deal_id, title, description, task_type,"
