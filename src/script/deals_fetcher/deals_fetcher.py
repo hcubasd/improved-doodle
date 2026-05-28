@@ -30,6 +30,8 @@ async def _fetch_all(fetcher: Fetcher) -> dict:
     (
         (pipelines, pipeline_stages),
         (products, deals, deal_products),
+        productless_ongoing,
+        productless_won,
         users,
         teams,
         campaigns,
@@ -42,6 +44,8 @@ async def _fetch_all(fetcher: Fetcher) -> dict:
     ) = await asyncio.gather(
         fetch_pipelines(),
         fetch_products(),
+        paginated_fetch("/deals", {"filter": "status:ongoing -has:product"}),
+        paginated_fetch("/deals", {"filter": f'status:won -has:product closed_at:>"{cutoff}"'}),
         paginated_fetch("/users"),
         paginated_fetch("/teams"),
         paginated_fetch("/campaigns"),
@@ -52,6 +56,10 @@ async def _fetch_all(fetcher: Fetcher) -> dict:
         paginated_fetch("/contacts"),
         paginated_fetch("/tasks"),
     )
+
+    deals_by_id = {d["id"]: d for d in deals}
+    for d in [*productless_ongoing, *productless_won]:
+        deals_by_id.setdefault(d["id"], d)
 
     return {
         "users": users,
@@ -66,7 +74,7 @@ async def _fetch_all(fetcher: Fetcher) -> dict:
         "organizations": organizations,
         "contacts": contacts,
         "tasks": tasks,
-        "deals": deals,
+        "deals": list(deals_by_id.values()),
         "deal_products": deal_products,
     }
 
