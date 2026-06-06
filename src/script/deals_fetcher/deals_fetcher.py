@@ -45,7 +45,9 @@ async def _fetch_all(fetcher: Fetcher) -> dict:
         fetch_pipelines(),
         fetch_products(),
         paginated_fetch("/deals", {"filter": "status:ongoing -has:product"}),
-        paginated_fetch("/deals", {"filter": f'status:won -has:product closed_at:>"{cutoff}"'}),
+        paginated_fetch(
+            "/deals", {"filter": f'status:won -has:product closed_at:>"{cutoff}"'}
+        ),
         paginated_fetch("/users"),
         paginated_fetch("/teams"),
         paginated_fetch("/campaigns"),

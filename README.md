@@ -26,7 +26,7 @@ list[CRMDeal]
 src/script/
   __main__.py                        entrypoint
   deals_fetcher/
-    main.py                          fetch_deals() → list[CRMDeal]
+    deals_fetcher.py                 fetch_deals() → list[CRMDeal]
     fetched_deals_assembler.py       raw API dicts → list[CRMDeal]
     fetch_pipelines_maker.py         async pipeline + stage fetcher
     fetch_products_maker.py          async product + deal fetcher, builds deal_products bridge
@@ -170,5 +170,5 @@ Pushing a `v*.*.*` tag triggers the `deployment` workflow, which builds a multi-
 
 ## Scripts
 
-- `scripts/config-helix.sh` — configures the Helix editor for this project's stack
+- `scripts/config-helix.sh` — installs the Helix language servers and formatters used here for Bash, TOML, YAML, Docker, and Python
 - `scripts/integrate.sh` — installs dependencies, adds pytest, and runs the test suite
