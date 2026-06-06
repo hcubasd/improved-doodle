@@ -1,6 +1,6 @@
 # improved-doodle
 
-RD Station CRM worker for the **modest-galois** project. Fetches the full CRM graph from the RD Station v2 API, assembles it into domain objects via **fluffy-waddle**, and writes it to the sales schema in Postgres.
+RD Station CRM worker for the dashboard project of **[mlclogistica.app](https://mlclogistica.app)**. Fetches the full CRM graph from the RD Station v2 API, assembles it into domain objects via **fluffy-waddle**, and writes it to the sales schema in Postgres.
 
 The sync strategy is a full replace every run: nuke the sales schema, repopulate from scratch. At ~2000 records this is faster than diffing.
 
@@ -12,7 +12,7 @@ RD Station API
 raw dicts
   ↓ fetched_deals_assembler.py
 list[CRMDeal]
-  ↓ src/script/deals_repository/   (DELETE → INSERT, one transaction)
+  ↓ src/script/deals_repository/   (TRUNCATE → INSERT, one transaction)
 Postgres sales.*
   ↓ selected_deals_assembler.py
 list[CRMDeal]
@@ -26,7 +26,7 @@ list[CRMDeal]
 src/script/
   __main__.py                        entrypoint
   deals_fetcher/
-    main.py                          fetch_deals() → list[CRMDeal]
+    deals_fetcher.py                 fetch_deals() → list[CRMDeal]
     fetched_deals_assembler.py       raw API dicts → list[CRMDeal]
     fetch_pipelines_maker.py         async pipeline + stage fetcher
     fetch_products_maker.py          async product + deal fetcher, builds deal_products bridge
@@ -39,8 +39,8 @@ src/script/
       httpx_fetch_maker.py           wraps httpx.AsyncClient as Fetcher
       paginated_fetch_maker.py       generic pagination over page[number]/page[size]
   deals_repository/
-    main.py                          DealsRepository — .update(deals) and .get()
-    deleter.py                       DELETE from all sales.* tables
+    deals_repository.py              DealsRepository — .update(deals) and .get()
+    deleter.py                       TRUNCATE all sales.* tables
     inserters.py                     insert_* per table, ON CONFLICT DO NOTHING
     selectors.py                     select_* per table
     selected_deals_assembler.py      DB rows → list[CRMDeal]
@@ -151,7 +151,7 @@ Exec into the app container and install dependencies:
 ```sh
 docker compose exec app bash
 cd /root/app
-. scripts/install-dependencies.sh
+bash scripts/integrate.sh
 ```
 
 Run the full roundtrip test (requires the compose DB to be up and migrated):
@@ -170,6 +170,5 @@ Pushing a `v*.*.*` tag triggers the `deployment` workflow, which builds a multi-
 
 ## Scripts
 
-- `scripts/config-helix.sh` — configures the Helix editor for this project's stack
-- `scripts/install-dependencies.sh` — creates a venv at `~/.venv` and installs production dependencies
+- `scripts/config-helix.sh` — installs the Helix language servers and formatters used here for Bash, TOML, YAML, Docker, and Python
 - `scripts/integrate.sh` — installs dependencies, adds pytest, and runs the test suite

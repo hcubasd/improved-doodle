@@ -3,19 +3,20 @@ from psycopg.rows import dict_row
 
 from fluffy_waddle.sales import CRMDeal
 
-from .deleter import delete
+from .deleter import truncate_all
 from .inserters import (
     all_users,
     insert_contacts,
     insert_deals,
     insert_join,
-    insert_named,
-    insert_named_described,
+    insert_loss_reasons,
     insert_organizations,
     insert_pipeline_stages,
     insert_pipelines,
     insert_products,
     insert_tasks,
+    insert_titled,
+    insert_titled_described,
     insert_users,
 )
 from .selected_deals_assembler import assemble_selected_deals
@@ -28,11 +29,11 @@ class DealsRepository:
     def update(self, deals: list[CRMDeal]) -> None:
         with self._conn.transaction():
             with self._conn.cursor() as cur:
-                delete(cur)
+                truncate_all(cur)
 
                 users = list(all_users(deals))
 
-                insert_named(
+                insert_titled(
                     cur,
                     "crm_industries",
                     [
@@ -43,24 +44,25 @@ class DealsRepository:
                     ],
                 )
                 insert_products(cur, deals)
-                insert_named(
+                insert_loss_reasons(
                     cur,
-                    "crm_loss_reasons",
                     [d.loss_reason.model_dump() for d in deals if d.loss_reason],
                 )
-                insert_named_described(
+                insert_titled_described(
                     cur,
                     "crm_sources",
                     [d.source.model_dump() for d in deals if d.source],
                 )
-                insert_named_described(
+                insert_titled_described(
                     cur,
                     "crm_campaigns",
                     [d.campaign.model_dump() for d in deals if d.campaign],
                 )
                 insert_users(cur, users)
-                insert_named(
-                    cur, "crm_teams", [u.team.model_dump() for u in users if u.team]
+                insert_titled(
+                    cur,
+                    "crm_teams",
+                    [u.team.model_dump() for u in users if u.team],
                 )
                 insert_join(
                     cur,
