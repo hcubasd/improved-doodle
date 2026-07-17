@@ -109,12 +109,15 @@ def _make_organization_map(
 def _make_tasks_by_deal_map(tasks: list[dict], user_map: dict) -> dict[str, list]:
     result: dict[str, list] = {}
     for raw in tasks:
+        created_by_id = raw.get("created_by_id")
+        if created_by_id not in user_map:
+            continue
         task = CRMTask.model_validate(
             {
                 **raw,
                 "title": raw["name"],
                 "task_type": raw["type"],
-                "created_by": user_map[raw["created_by_id"]],
+                "created_by": user_map[created_by_id],
                 "completed_by": user_map.get(raw.get("completed_by_id")),
                 "assignees": [
                     user_map[i] for i in raw.get("owner_ids", []) if i in user_map
